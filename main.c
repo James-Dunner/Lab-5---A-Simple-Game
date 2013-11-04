@@ -12,6 +12,7 @@
 
 void init_timer();
 void init_buttons();
+void testAndRespondToButtonPush(buttonToTest);
 
 void main(void)
 {
@@ -33,20 +34,25 @@ void main(void)
 	char gameOverBottomLine[] = "OVER!";
 
 	player = initPlayer();
-	gameIsOn = 0;
+	gameIsOn = 1;
 	gameOver = 0;
 	gameWon = 0;
 
-	init_timer();
+	//init_timer();
 	init_buttons();
 	__enable_interrupt();
 
-	gameIsOn = 1;
+	printPlayer(player);
 
 	while(1)
 	{
 		while(gameIsOn)
 		{
+			/*while(flag <= 4)
+			{
+
+			}*/
+
 
 
 			gameWon = didPlayerWin(player);
@@ -80,27 +86,19 @@ void main(void)
 
 }
 
-/*#pragma vector=PORT1_VECTOR
+/*#pragma vector = TIMER0_A1_VECTOR
+__interrupt void TIMER0_A1_ISR()
+{
+    TACTL &= ~TAIFG;            // clear interrupt flag
+    flag++;
+}*/
+
+#pragma vector = PORT1_VECTOR
 __interrupt void Port_1_ISR(void)
 {
-    if (P1IFG & BIT1)
-    {
-        P1IFG &= ~BIT1;                            // clear flag
-        P1OUT ^= BIT6;                            // toggle LED 2
-    }
 
-    if (P1IFG & BIT2)
-    {
-        P1IFG &= ~BIT2;                         // clear flag
-        P1OUT ^= BIT0;                            // toggle LED 1
-    }
 
-    if (P1IFG & BIT3)
-    {
-        P1IFG &= ~BIT3;                         // clear P1.3 interrupt flag
-        P1OUT ^= BIT0|BIT6;                     // toggle both LEDs
-    }
-}*/
+}
 
 void init_timer()
 {
@@ -110,7 +108,7 @@ void init_timer()
 
     TACTL |= TASSEL1;           						// configure for SMCLK
 
-    // TACTL |= ID1|ID0;           						// divide clock by 8
+    TACTL |= ID1|ID0;           						// divide clock by 8
 
     TACTL |= MC1;               						// set count mode to continuous
 
@@ -128,4 +126,13 @@ void init_buttons()
     P1OUT |= BIT1|BIT2|BIT3|BIT4;                   			// configure as pull-up
 
     P1IFG &= ~(BIT1|BIT2|BIT3|BIT4);                			// clear flags
+}
+
+void testAndRespondToButtonPush(buttonToTest)
+{
+    if (P1IFG & BIT1)
+    {
+        P1IFG &= ~BIT1;							// clear P1.1 flag
+    }
+
 }

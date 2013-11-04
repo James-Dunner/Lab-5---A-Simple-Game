@@ -28,7 +28,7 @@ void printPlayer(unsigned char playerLocation);
 void clearPlayer(unsigned char playerLocation);
 
 // Given a player's current position and a direction, returns an updated player position.
-unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonToTest);
+unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushed);
 
 // Returns true if the position passed in is the winning game position.
 char didPlayerWin(unsigned char playerPosition);
