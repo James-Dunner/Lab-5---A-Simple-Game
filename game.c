@@ -8,6 +8,8 @@
 #include "game.h"
 #include "msp430-rng/rand.h"
 
+unsigned int initialSeed = 0x1234;
+
 playingBoard initBoard()
 {
 	playingBoard board;
@@ -27,13 +29,44 @@ playingBoard initBoard()
 	}
 
 	initPlayer(&board);
-	randomSeed = rand();
+	randomSeed = prand(initialSeed);
 	placeMines(&board, randomSeed);
 
 	return board;
 }
 
-void placeMines(playingBoard * board, unsigned int randNum)
+void placeMines(playingBoard * board, unsigned int randomSeed)
+{
+	char mine_1_X, mine_1_Y, mine_2_X, mine_2_Y;
+	int randomNum;
+
+	randomNum = prand(randomSeed);
+	mine_1_X = (randomNum)%8; // Generates x-coord for first mine
+
+	randomNum = prand(randomNum);
+	mine_1_Y = (randomNum)%2; // Generates y-coord for first mine
+
+	randomNum = prand(randomNum);
+	mine_2_X = (randomNum)%8; // Generates x-coord for second mine
+
+	randomNum = prand(randomNum);
+	mine_2_Y = (randomNum)%2; // Generates y-coord for second mine
+
+	if(!mine_1_X && !mine_1_Y) // Will shift mine so not on start position
+	{
+		mine_1_X++;
+	}
+
+	if(!mine_2_X && !mine_2_Y) // Will shift mine so not on start position
+	{
+		mine_1_X++;
+	}
+
+	board->boardArray[mine_1_Y][mine_1_X] = MINE;
+	board->boardArray[mine_2_Y][mine_2_X] = MINE;
+}
+
+char correctMinePlacement(playingBoard * board)
 {
 
 }

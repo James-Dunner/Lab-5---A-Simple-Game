@@ -33,7 +33,7 @@ playingBoard initBoard();
 void initPlayer(playingBoard * board);
 
 // Places mines on board
-void placeMines(playingBoard * board, unsigned int randNum);
+void placeMines(playingBoard * board, unsigned int randomSeed);
 
 // Prints player marker (*) at the player location passed in.
 void printPlayer(unsigned char playerLocation);

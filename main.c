@@ -10,9 +10,9 @@
 #include "buttons/button.h"
 #include "game.h"
 
-void init_timer();
+//void init_timer();
 void init_buttons();
-void testAndRespondToButtonPush(unsigned char buttonToTest);
+//void testAndRespondToButtonPush(unsigned char buttonToTest);
 
 void main(void)
 {
@@ -25,18 +25,16 @@ void main(void)
 	LCD_init();
 	LCD_CLR();
 
-	unsigned char player;
-	unsigned char gameIsOn, gameOver, gameWon;
+	//unsigned char player;
+	//unsigned char gameIsOn, gameOver, gameWon;
 
 	char youWonTopLine[] = "YOU";
 	char youWonBottomLine[] = "WON!";
 	char gameOverTopLine[] = "GAME";
 	char gameOverBottomLine[] = "OVER!";
 
-	player = initPlayer();
-	gameIsOn = 1;
-	gameOver = 0;
-	gameWon = 0;
+	initBoard();
+
 
 	//init_timer();
 	init_buttons();
