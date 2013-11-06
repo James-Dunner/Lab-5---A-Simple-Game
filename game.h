@@ -35,11 +35,8 @@ void initPlayer(playingBoard * board);
 // Places mines on board
 void placeMines(playingBoard * board, unsigned int randomSeed);
 
-// Prints player marker (*) at the player location passed in.
-void printPlayer(unsigned char playerLocation);
-
-// Clears the location passed in.
-void clearPlayer(unsigned char playerLocation);
+// Checks that mines were correctly placed on board
+char correctMinePlacement(playingBoard * board);
 
 // Given a player's current position and a direction, returns an updated player position.
 unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushed);

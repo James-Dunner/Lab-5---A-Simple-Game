@@ -8,7 +8,7 @@
 #include "game.h"
 #include "msp430-rng/rand.h"
 
-unsigned int initialSeed = 0x1234;
+unsigned int initialSeed = 0x1234; // Initial seed that will be used to gen random number
 
 playingBoard initBoard()
 {
@@ -20,7 +20,7 @@ playingBoard initBoard()
 	board.boardWidth = BOARD_WIDTH;
 	board.boardHeight = BOARD_HEIGHT;
 
-	for(i = 0; i < board.boardWidth; i++)
+	for(i = 0; i < board.boardWidth; i++) // Initialize each location as blank space
 	{
 		for(j = 0; j < board.boardHeight; j++)
 		{
@@ -30,7 +30,11 @@ playingBoard initBoard()
 
 	initPlayer(&board);
 	randomSeed = prand(initialSeed);
-	placeMines(&board, randomSeed);
+
+	do	// If generated mines do not meet spec, will regenerate mines
+	{
+		placeMines(&board, randomSeed);
+	} while(!correctMinePlacement(&board));
 
 	return board;
 }
@@ -39,6 +43,15 @@ void placeMines(playingBoard * board, unsigned int randomSeed)
 {
 	char mine_1_X, mine_1_Y, mine_2_X, mine_2_Y;
 	int randomNum;
+	int i, j;
+
+	for(i = 0; i < board->boardWidth; i++) // Clears board except for player so old mines cleared
+	{
+		for(j = 0; j < board->boardHeight; j++)
+		{
+			board->boardArray[j][i] = BLANK;
+		}
+	}
 
 	randomNum = prand(randomSeed);
 	mine_1_X = (randomNum)%8; // Generates x-coord for first mine
@@ -52,23 +65,60 @@ void placeMines(playingBoard * board, unsigned int randomSeed)
 	randomNum = prand(randomNum);
 	mine_2_Y = (randomNum)%2; // Generates y-coord for second mine
 
-	if(!mine_1_X && !mine_1_Y) // Will shift mine so not on start position
-	{
-		mine_1_X++;
-	}
-
-	if(!mine_2_X && !mine_2_Y) // Will shift mine so not on start position
-	{
-		mine_1_X++;
-	}
-
 	board->boardArray[mine_1_Y][mine_1_X] = MINE;
 	board->boardArray[mine_2_Y][mine_2_X] = MINE;
 }
 
 char correctMinePlacement(playingBoard * board)
 {
+	int i, j;
 
+	char mine_1_x = -1;
+	char mine_1_y = -1;
+	char mine_2_x = -1;
+	char mine_2_y = -1;
+
+	for(i = 0; i < board->boardHeight; i++)
+	{
+		for(j = 0; j < board->boardWidth; j++)
+		{
+			if (board->boardArray[i][j] == MINE)
+			{
+				if(mine_1_x == -1)
+				{
+					mine_1_x = j;
+					mine_1_y = i;
+				}
+				else
+				{
+					mine_2_x = j;
+					mine_2_y = i;
+				}
+			}
+		}
+	}
+
+	if(mine_1_x == -1 || mine_1_y == -1 || mine_2_x == -1 || mine_2_y == -1) // Checks to make sure two mines were placed
+	{
+		return 0;
+	}
+
+	if((mine_1_x == 0 && mine_1_y == 0) || (mine_2_x == 0 && mine_2_y == 0)) // Checks if mine at start
+	{
+		return 0;
+	}
+
+	if((mine_1_x == 7 && mine_1_y == 1) || (mine_2_x == 7 && mine_2_y == 1)) // Checks if mine at finish
+	{
+		return 0;
+	}
+
+	if((mine_1_y != mine_2_y) && (mine_2_x - mine_1_x < 2))
+	{
+		return 0;
+	}
+
+	return 1;
 }
 
 void clearBoard(playingBoard board)
@@ -87,13 +137,6 @@ void clearBoard(playingBoard board)
 void initPlayer(playingBoard * board)
 {
 	board->boardArray[0][0] = PLAYER;
-}
-
-void clearPlayer(unsigned char playerLocation)
-{
-	writeCommandByte(playerLocation);
-	writeDataByte(0x20);
-
 }
 
 unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushed)
