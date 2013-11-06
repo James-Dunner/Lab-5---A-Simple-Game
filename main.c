@@ -12,7 +12,7 @@
 
 void init_timer();
 void init_buttons();
-void testAndRespondToButtonPush(buttonToTest);
+void testAndRespondToButtonPush(unsigned char buttonToTest);
 
 void main(void)
 {
@@ -86,18 +86,25 @@ void main(void)
 
 }
 
-/*#pragma vector = TIMER0_A1_VECTOR
+#pragma vector = TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
 {
-    TACTL &= ~TAIFG;            // clear interrupt flag
-    flag++;
-}*/
+    _disable_interrupt();
+	TACTL &= ~TAIFG;            // clear interrupt flag
+
+
+	flag++;
+}
 
 #pragma vector = PORT1_VECTOR
 __interrupt void Port_1_ISR(void)
 {
+	_disable_interrupt();
 
-
+	testAndRespondToButtonPush();
+	testAndRespondToButtonPush();
+	testAndRespondToButtonPush();
+	testAndRespondToButtonPush();
 }
 
 void init_timer()
@@ -128,11 +135,27 @@ void init_buttons()
     P1IFG &= ~(BIT1|BIT2|BIT3|BIT4);                			// clear flags
 }
 
-void testAndRespondToButtonPush(buttonToTest)
+void testAndRespondToButtonPush(char buttonToTest)
 {
-    if (P1IFG & BIT1)
+    if (buttonToTest & P1IFG)
     {
-        P1IFG &= ~BIT1;							// clear P1.1 flag
+        if (buttonToTest & P1IES)
+        {
+
+            clearTimer();
+        } else
+        {
+            debounce();
+        }
+
+        P1IES ^= buttonToTest;
+        P1IFG &= ~buttonToTest;
     }
+
+void debounce()
+{
+	_delay_cycles(1000);
+}
+
 
 }

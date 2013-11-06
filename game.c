@@ -6,19 +6,54 @@
  */
 #include <msp430.h>
 #include "game.h"
-#include "lcd.h"
+#include "msp430-rng/rand.h"
 
-unsigned char initPlayer()
+playingBoard initBoard()
 {
-	unsigned char player = 0x80;
+	playingBoard board;
 
-	return player;
+	unsigned int i, j;
+	unsigned int randomSeed;
+
+	board.boardWidth = BOARD_WIDTH;
+	board.boardHeight = BOARD_HEIGHT;
+
+	for(i = 0; i < board.boardWidth; i++)
+	{
+		for(j = 0; j < board.boardHeight; j++)
+		{
+			board.boardArray[j][i] = BLANK;
+		}
+	}
+
+	initPlayer(&board);
+	randomSeed = rand();
+	placeMines(&board, randomSeed);
+
+	return board;
 }
 
-void printPlayer(unsigned char playerLocation)
+void placeMines(playingBoard * board, unsigned int randNum)
 {
-	writeCommandByte(playerLocation);
-	writeDataByte(0x2a);
+
+}
+
+void clearBoard(playingBoard board)
+{
+	int i, j;
+
+	for(i = 0; i < board.boardWidth; i++)
+	{
+		for(j = 0; j < board.boardHeight; j++)
+		{
+			board.boardArray[j][i] = BLANK;
+		}
+	}
+}
+
+void initPlayer(playingBoard * board)
+{
+	board->boardArray[0][0] = PLAYER;
 }
 
 void clearPlayer(unsigned char playerLocation)

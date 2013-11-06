@@ -6,20 +6,34 @@
  *************************************************************/
 #include <msp430.h>
 
+#ifndef GAME_H_
+#define GAME_H_
+
+#define BOARD_WIDTH 8 // Length of board (char)
+#define BOARD_HEIGHT 2 // Height of board (char)
+#define PLAYER	0x2a // * character for player
+#define MINE 0x58 // X for mines
+#define BLANK 0x20 // Space character
 #define UP 1
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
 
-#define ROW_MASK 0x40
+typedef struct playingBoard
+{
+	char boardArray[BOARD_HEIGHT][BOARD_WIDTH];
+	char boardWidth;
+	char boardHeight;
+} playingBoard;
 
-#define NUM_MINES 2
-
-#ifndef GAME_H_
-#define GAME_H_
+// Initializes board
+playingBoard initBoard();
 
 // Initializes player at starting location
-unsigned char initPlayer();
+void initPlayer(playingBoard * board);
+
+// Places mines on board
+void placeMines(playingBoard * board, unsigned int randNum);
 
 // Prints player marker (*) at the player location passed in.
 void printPlayer(unsigned char playerLocation);
