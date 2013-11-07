@@ -10,14 +10,13 @@
 #include "game.h"
 
 char timerCount = 1; // Keeps track of how many times interrupt triggered
-char volatile gameOn = 1; // Starts the game
+signed char gameOn = 1; // Starts the game
 playingBoard gameBoard;
 
 void init_timer();
 void init_buttons();
 char * getTopLineOfBoard(playingBoard * gameBoard);
 char * getBottomLineOfBoard(playingBoard * gameBoard);
-//void testAndRespondToButtonPush(unsigned char buttonToTest);
 
 void main(void)
 {
@@ -29,10 +28,12 @@ void main(void)
 	LCD_init();
 	LCD_CLR();
 
-	/*char youWonTopLine[] = "YOU";
+	char youWonTopLine[] = "YOU";
 	char youWonBottomLine[] = "WON!";
 	char gameOverTopLine[] = "GAME";
-	char gameOverBottomLine[] = "OVER!";*/
+	char gameOverBottomLine[] = "OVER!";
+	char boomTopLine[] = "BOOOO";
+	char boomBottomLine[] = "OOOM!";
 
 	gameBoard = initBoard();
 	init_timer();
@@ -47,57 +48,118 @@ void main(void)
 			writeString(getTopLineOfBoard(&gameBoard));
 			cursorToLineTwo();
 			writeString(getBottomLineOfBoard(&gameBoard));
-
 		}
 
-		clearBoard();
+		LCD_CLR();
 
-
-		/*
-		if(gameWon == 1)
+		if(gameOn <= 0)
 		{
-			LCD_CLR();
-			writeString(youWonTopLine);
-			cursorToLineTwo();
-			writeString(youWonBottomLine);
+			if(!timerCount)
+			{
+				cursorToLineOne();
+				writeString(gameOverTopLine);
+				cursorToLineTwo();
+				writeString(gameOverBottomLine);
+			}
+
+			if(gameOn == BOOM)
+			{
+				cursorToLineOne();
+				writeString(boomTopLine);
+				cursorToLineTwo();
+				writeString(boomBottomLine);
+			}
+
+			if(gameOn == WINNER)
+			{
+				cursorToLineOne();
+				writeString(youWonTopLine);
+				cursorToLineTwo();
+				writeString(youWonBottomLine);
+			}
 		}
 
-		else
-		{
-			LCD_CLR();
-			writeString(gameOverTopLine);
-			cursorToLineTwo();
-			writeString(gameOverBottomLine);
-		}
-	}*/
 
 
-
-	
-
-
+	}
 }
 
 #pragma vector = TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
 {
-    _disable_interrupt();
 	TACTL &= ~TAIFG;            // clears interrupt flag
 
+	if(timerCount <= RESET_CLOCK && gameOn == 1) // Game is on and Clock is still counting
+	{
+		timerCount++;
+	}
 
-
-	flag++;
+	if(gameOn == 1)
+	{
+		clearBoard(&gameBoard);
+		timerCount = OVERFLOW;
+		gameOn = 0;
+	}
 }
 
-/*#pragma vector = PORT1_VECTOR
+#pragma vector = PORT1_VECTOR
 __interrupt void Port_1_ISR(void)
 {
-	_disable_interrupt();
+	if(BIT1 & P1IFG)
+	{
+		if(BIT1 & P1IES)
+		{
+			gameOn = movePlayer(&gameBoard,UP);
+		}else
+		{
+			debounce();
+		}
 
-	testAndRespondToButtonPush();
-	testAndRespondToButtonPush();
-	testAndRespondToButtonPush();
-	testAndRespondToButtonPush();
+		P1IES ^= BIT1;
+		P1IFG &= ~BIT1;
+	}
+
+	if(BIT2 & P1IFG)
+	{
+		if(BIT2 & P1IES)
+		{
+			gameOn = movePlayer(&gameBoard,DOWN);
+		}else
+		{
+			debounce();
+		}
+
+		P1IES ^= BIT2;
+		P1IFG &= ~BIT2;
+	}
+
+	if(BIT3 & P1IFG)
+	{
+		if(BIT3 & P1IES)
+		{
+			gameOn = movePlayer(&gameBoard,LEFT);
+		}else
+		{
+			debounce();
+		}
+
+		P1IES ^= BIT3;
+		P1IFG &= ~BIT3;
+	}
+
+	if(BIT4 & P1IFG)
+	{
+		if(BIT4 & P1IES)
+		{
+			gameOn = movePlayer(&gameBoard,RIGHT);
+		}else
+		{
+			debounce();
+		}
+
+		P1IES ^= BIT4;
+		P1IFG &= ~BIT4;
+	}
 }
 
 void init_timer()
@@ -120,25 +182,7 @@ void init_buttons()
     P1REN |= BIT1|BIT2|BIT3|BIT4;                   			// enable internal pull-up/pull-down network
     P1OUT |= BIT1|BIT2|BIT3|BIT4;                   			// configure as pull-up
     P1IFG &= ~(BIT1|BIT2|BIT3|BIT4);                			// clear flags
-}*/
-
-/*void testAndRespondToButtonPush(char buttonToTest)
-{
-    if (buttonToTest & P1IFG)
-    {
-        if (buttonToTest & P1IES)
-        {
-
-            clearTimer();
-        } else
-        {
-            debounce();
-        }
-
-        P1IES ^= buttonToTest;
-        P1IFG &= ~buttonToTest;
-    }
-*/
+}
 
 char * getTopLineOfBoard(playingBoard * gameBoard)
 {
@@ -150,7 +194,3 @@ char * getBottomLineOfBoard(playingBoard * gameBoard)
 	return gameBoard->boardArray[1];
 }
 
-/*void debounce()
-{
-	_delay_cycles(1000);
-}*/

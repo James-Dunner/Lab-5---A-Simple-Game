@@ -8,7 +8,7 @@
 #include "game.h"
 #include "msp430-rng/rand.h"
 
-unsigned int initialSeed = 0x1234; // Initial seed that will be used to gen random number
+unsigned volatile int initialSeed = 0x1234; // Initial seed that will be used to gen random number
 
 playingBoard initBoard()
 {
@@ -28,6 +28,7 @@ playingBoard initBoard()
 		}
 
 		board.boardArray[i][BOARD_WIDTH] = 0x0; // Placed null character at the end of each line so I can print to LCD
+		board.boardArray[1][7] = FINISH; // Marks end of the game
 	}
 
 	initPlayer(&board);
@@ -50,7 +51,7 @@ void placeMines(playingBoard * board, unsigned int randomSeed)
 {
 	char mine_1_X, mine_1_Y, mine_2_X, mine_2_Y;
 	unsigned int randomNum;
-	int i, j;
+	unsigned int i, j;
 
 	for(i = 0; i < board->boardHeight; i++) // need to clear board in case previous mines were incorrectly placed
 	{
@@ -81,7 +82,7 @@ void placeMines(playingBoard * board, unsigned int randomSeed)
 
 char correctMinePlacement(playingBoard * board)
 {
-	int i, j;
+	unsigned int i, j;
 
 	// Cannot use 0 or 1 because those are potential coordinates of mines
 	signed char mine_1_x = -1; // Changed to signed char
@@ -135,7 +136,7 @@ char correctMinePlacement(playingBoard * board)
 
 void clearBoard(playingBoard * gameBoard)
 {
-	int i, j;
+	unsigned int i, j;
 
 	for(i = 0; i < gameBoard->boardWidth; i++)
 	{
@@ -146,7 +147,7 @@ void clearBoard(playingBoard * gameBoard)
 	}
 }
 
-unsigned char movePlayer(playingBoard * gameBoard, unsigned char movementDirection)
+signed char movePlayer(playingBoard * gameBoard, unsigned char movementDirection)
 {
 	unsigned volatile char playerLocation_X, playerLocation_Y;
 
@@ -201,21 +202,23 @@ unsigned char movePlayer(playingBoard * gameBoard, unsigned char movementDirecti
 	}
 
 	// Tests if player made it to finish
-	if(gameBoard->boardArray[playerLocation_Y][playerLocation_X] == FINISH)
+	if(gameBoard->boardArray[playerLocation_Y][playerLocation_X] == FINISH) // Adding mark on game board to indicate finish
 	{
 		clearBoard(gameBoard);
 		return WINNER;
 	}
 
 	// If player neither wins nor loses, just move the * and remove from previous location
-	board->boardArray[findPlayer_Y(gameBoard)][findPlayer_X(gameBoard)] = BLANK;
-	board->boardArray[playerLocation_Y][playerLocation_X] = PLAYER;
+	gameBoard->boardArray[findPlayer_Y(gameBoard)][findPlayer_X(gameBoard)] = BLANK;
+	gameBoard->boardArray[playerLocation_Y][playerLocation_X] = PLAYER;
+
+	return 1;
 }
 
-unsigned int findPlayer_X(playingBoard * gameBoard)
+unsigned char findPlayer_X(playingBoard * gameBoard)
 {
 	unsigned int i, j;
-	unsigned int xCoordinate;
+	unsigned char xCoordinate;
 
 	for(i = 0; i < gameBoard->boardHeight; i++)
 	{
@@ -231,10 +234,10 @@ unsigned int findPlayer_X(playingBoard * gameBoard)
 	return xCoordinate;
 }
 
-unsigned int findPlayer_Y(playingBoard * gameBoard)
+unsigned char findPlayer_Y(playingBoard * gameBoard)
 {
 	unsigned int i, j;
-	unsigned int yCoordinate;
+	unsigned char yCoordinate;
 
 	for(i = 0; i < gameBoard->boardHeight; i++)
 	{

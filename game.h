@@ -19,6 +19,10 @@
 #define LEFT 3
 #define RIGHT 4
 #define BOOM 0
+#define WINNER -1
+#define FINISH 0x46
+#define RESET_CLOCK 4
+#define OVERFLOW 0
 
 typedef struct playingBoard
 {
@@ -40,13 +44,13 @@ void placeMines(playingBoard * board, unsigned int randomSeed);
 char correctMinePlacement(playingBoard * board);
 
 // Given a player's current position and a direction, returns an updated player position.
-unsigned char movePlayer(playingBoard * gameBoard, unsigned char movementDirection);
+signed char movePlayer(playingBoard * gameBoard, unsigned char movementDirection);
 
 // Locates Player X-Coord
-unsigned int findPlayer_X(playingBoard * gameBoard);
+unsigned char findPlayer_X(playingBoard * gameBoard);
 
 // Locates Player Y-Coord
-unsigned int findPlayer_Y(playingBoard * gameBoard);
+unsigned char findPlayer_Y(playingBoard * gameBoard);
 
 // Clears game board
 void clearBoard(playingBoard * gameBoard);
