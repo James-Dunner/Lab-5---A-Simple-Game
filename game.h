@@ -18,6 +18,7 @@
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
+#define BOOM 0
 
 typedef struct playingBoard
 {
@@ -46,6 +47,9 @@ unsigned int findPlayer_X(playingBoard * gameBoard);
 
 // Locates Player Y-Coord
 unsigned int findPlayer_Y(playingBoard * gameBoard);
+
+// Clears game board
+void clearBoard(playingBoard * gameBoard);
 
 // Returns true if the position passed in is the winning game position.
 char didPlayerWin(unsigned char playerPosition);

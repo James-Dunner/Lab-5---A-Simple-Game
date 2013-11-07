@@ -133,15 +133,15 @@ char correctMinePlacement(playingBoard * board)
 	return 1;
 }
 
-void clearBoard(playingBoard board)
+void clearBoard(playingBoard * gameBoard)
 {
 	int i, j;
 
-	for(i = 0; i < board.boardWidth; i++)
+	for(i = 0; i < gameBoard->boardWidth; i++)
 	{
-		for(j = 0; j < board.boardHeight; j++)
+		for(j = 0; j < gameBoard->boardHeight; j++)
 		{
-			board.boardArray[j][i] = BLANK;
+			gameBoard->boardArray[j][i] = BLANK;
 		}
 	}
 }
@@ -153,47 +153,63 @@ unsigned char movePlayer(playingBoard * gameBoard, unsigned char movementDirecti
 	playerLocation_X = findPlayer_X(gameBoard);
 	playerLocation_Y = findPlayer_Y(gameBoard);
 
+	// Executes the movement
 	switch (movementDirection)
 	{
 		case UP:
 
-			if (0x80 <= playerPosition && playerPosition <= 0x87)
+			if (playerLocation_Y != 0)
 			{
-				playerPosition -= 0x40;
+				playerLocation_Y--;
 			}
-			else;
 
 		break;
 
 		case DOWN:
 
-			if (0xc0 <= playerPosition && playerPosition <= 0xc7)
+			if (playerLocation_Y != 1)
 			{
-				playerPosition += 0x40;
+				playerLocation_Y ++;
 			}
 
 		break;
 
 		case LEFT:
 
-			if (playerPosition != 0xc0 || playerPosition != 0x80)
+			if (playerLocation_X != 0)
 			{
-				playerPosition--;
+				playerLocation_X--;
 			}
 
 		break;
 
 		case RIGHT:
 
-			if(playerPosition != 0xc7 || playerPosition != 0x87)
+			if(playerLocation_X != 7)
 			{
-				playerPosition++;
+				playerLocation_X++;
 			}
 
 		break;
 	}
 
-	return playerPosition;
+	// Tests if player hit mine
+	if(gameBoard->boardArray[playerLocation_Y][playerLocation_X] == MINE)
+	{
+		clearBoard(gameBoard);
+		return BOOM;
+	}
+
+	// Tests if player made it to finish
+	if(gameBoard->boardArray[playerLocation_Y][playerLocation_X] == FINISH)
+	{
+		clearBoard(gameBoard);
+		return WINNER;
+	}
+
+	// If player neither wins nor loses, just move the * and remove from previous location
+	board->boardArray[findPlayer_Y(gameBoard)][findPlayer_X(gameBoard)] = BLANK;
+	board->boardArray[playerLocation_Y][playerLocation_X] = PLAYER;
 }
 
 unsigned int findPlayer_X(playingBoard * gameBoard)
