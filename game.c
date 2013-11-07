@@ -20,12 +20,14 @@ playingBoard initBoard()
 	board.boardWidth = BOARD_WIDTH;
 	board.boardHeight = BOARD_HEIGHT;
 
-	for(i = 0; i < board.boardWidth; i++) // Initialize each location as blank space
+	for(i = 0; i < board.boardHeight; i++) // Initialize each location as blank space
 	{
-		for(j = 0; j < board.boardHeight; j++)
+		for(j = 0; j < board.boardWidth; j++)
 		{
-			board.boardArray[j][i] = BLANK;
+			board.boardArray[i][j] = BLANK;
 		}
+
+		board.boardArray[i][BOARD_WIDTH] = 0x0; // Placed null character at the end of each line so I can print to LCD
 	}
 
 	initPlayer(&board);
@@ -39,17 +41,25 @@ playingBoard initBoard()
 	return board;
 }
 
+void initPlayer(playingBoard * board)
+{
+	board->boardArray[0][0] = PLAYER; // Place * at start
+}
+
 void placeMines(playingBoard * board, unsigned int randomSeed)
 {
 	char mine_1_X, mine_1_Y, mine_2_X, mine_2_Y;
-	int randomNum;
+	unsigned int randomNum;
 	int i, j;
 
-	for(i = 0; i < board->boardWidth; i++) // Clears board except for player so old mines cleared
+	for(i = 0; i < board->boardHeight; i++) // need to clear board in case previous mines were incorrectly placed
 	{
-		for(j = 0; j < board->boardHeight; j++)
+		for(j = 0; j < board->boardWidth; j++)
 		{
-			board->boardArray[j][i] = BLANK;
+			if(i != 0 && j != 0) // Won't clear * at the start
+			{
+				board->boardArray[i][j] = BLANK;
+			}
 		}
 	}
 
@@ -73,11 +83,13 @@ char correctMinePlacement(playingBoard * board)
 {
 	int i, j;
 
-	char mine_1_x = -1;
-	char mine_1_y = -1;
-	char mine_2_x = -1;
-	char mine_2_y = -1;
+	// Cannot use 0 or 1 because those are potential coordinates of mines
+	signed char mine_1_x = -1; // Changed to signed char
+	signed char mine_1_y = -1;
+	signed char mine_2_x = -1;
+	signed char mine_2_y = -1;
 
+	// Will search for both mines and record coordinates so I can test for correct placement
 	for(i = 0; i < board->boardHeight; i++)
 	{
 		for(j = 0; j < board->boardWidth; j++)
@@ -113,7 +125,7 @@ char correctMinePlacement(playingBoard * board)
 		return 0;
 	}
 
-	if((mine_1_y != mine_2_y) && (mine_2_x - mine_1_x < 2))
+	if((mine_1_y != mine_2_y) && (mine_2_x - mine_1_x < 2)) // Checks to make sure path isn't blocked by mines
 	{
 		return 0;
 	}
@@ -132,11 +144,6 @@ void clearBoard(playingBoard board)
 			board.boardArray[j][i] = BLANK;
 		}
 	}
-}
-
-void initPlayer(playingBoard * board)
-{
-	board->boardArray[0][0] = PLAYER;
 }
 
 unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushed)

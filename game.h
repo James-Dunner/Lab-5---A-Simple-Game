@@ -21,7 +21,7 @@
 
 typedef struct playingBoard
 {
-	char boardArray[BOARD_HEIGHT][BOARD_WIDTH];
+	char boardArray[BOARD_HEIGHT][BOARD_WIDTH+1];
 	char boardWidth;
 	char boardHeight;
 } playingBoard;
