@@ -146,9 +146,14 @@ void clearBoard(playingBoard board)
 	}
 }
 
-unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushed)
+unsigned char movePlayer(playingBoard * gameBoard, unsigned char movementDirection)
 {
-	switch (buttonPushed)
+	unsigned volatile char playerLocation_X, playerLocation_Y;
+
+	playerLocation_X = findPlayer_X(gameBoard);
+	playerLocation_Y = findPlayer_Y(gameBoard);
+
+	switch (movementDirection)
 	{
 		case UP:
 
@@ -191,14 +196,40 @@ unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushe
 	return playerPosition;
 }
 
-char didPlayerWin(unsigned char playerPosition)
+unsigned int findPlayer_X(playingBoard * gameBoard)
 {
-	unsigned char winner = 0;
+	unsigned int i, j;
+	unsigned int xCoordinate;
 
-	if (playerPosition == 0xc7)
+	for(i = 0; i < gameBoard->boardHeight; i++)
 	{
-		winner = 1;
+		for(j = 0; j < gameBoard->boardWidth; j++)
+		{
+			if(gameBoard->boardArray[i][j] == PLAYER)
+			{
+				xCoordinate = j;
+			}
+		}
 	}
 
-	return winner;
+	return xCoordinate;
+}
+
+unsigned int findPlayer_Y(playingBoard * gameBoard)
+{
+	unsigned int i, j;
+	unsigned int yCoordinate;
+
+	for(i = 0; i < gameBoard->boardHeight; i++)
+	{
+		for(j = 0; j < gameBoard->boardWidth; j++)
+		{
+			if(gameBoard->boardArray[i][j] == PLAYER)
+			{
+				yCoordinate = i;
+			}
+		}
+	}
+
+	return yCoordinate;
 }

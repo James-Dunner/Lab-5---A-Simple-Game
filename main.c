@@ -9,11 +9,12 @@
 #include "buttons/button.h"
 #include "game.h"
 
-//char timerCount = 1;
+char timerCount = 1; // Keeps track of how many times interrupt triggered
+char volatile gameOn = 1; // Starts the game
 playingBoard gameBoard;
 
-//void init_timer();
-//void init_buttons();
+void init_timer();
+void init_buttons();
 char * getTopLineOfBoard(playingBoard * gameBoard);
 char * getBottomLineOfBoard(playingBoard * gameBoard);
 //void testAndRespondToButtonPush(unsigned char buttonToTest);
@@ -28,20 +29,18 @@ void main(void)
 	LCD_init();
 	LCD_CLR();
 
-	char volatile gameOn = 1;								// Set it to one so game will continue
-
 	/*char youWonTopLine[] = "YOU";
 	char youWonBottomLine[] = "WON!";
 	char gameOverTopLine[] = "GAME";
 	char gameOverBottomLine[] = "OVER!";*/
 
 	gameBoard = initBoard();
-	//init_timer();
-	//init_buttons();
-	//__enable_interrupt();
+	init_timer();
+	init_buttons();
+	__enable_interrupt();
 
-	//while(1)
-	//{
+	while(1)
+	{
 		while(gameOn)
 		{
 			cursorToLineOne();
@@ -50,6 +49,9 @@ void main(void)
 			writeString(getBottomLineOfBoard(&gameBoard));
 
 		}
+
+		clearBoard();
+
 
 		/*
 		if(gameWon == 1)
@@ -76,15 +78,16 @@ void main(void)
 
 }
 
-/*#pragma vector = TIMER0_A1_VECTOR
+#pragma vector = TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
 {
     _disable_interrupt();
-	TACTL &= ~TAIFG;            // clear interrupt flag
+	TACTL &= ~TAIFG;            // clears interrupt flag
+
 
 
 	flag++;
-}*/
+}
 
 /*#pragma vector = PORT1_VECTOR
 __interrupt void Port_1_ISR(void)

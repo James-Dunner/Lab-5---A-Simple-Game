@@ -39,7 +39,13 @@ void placeMines(playingBoard * board, unsigned int randomSeed);
 char correctMinePlacement(playingBoard * board);
 
 // Given a player's current position and a direction, returns an updated player position.
-unsigned char movePlayer(unsigned char playerPosition, unsigned char buttonPushed);
+unsigned char movePlayer(playingBoard * gameBoard, unsigned char movementDirection);
+
+// Locates Player X-Coord
+unsigned int findPlayer_X(playingBoard * gameBoard);
+
+// Locates Player Y-Coord
+unsigned int findPlayer_Y(playingBoard * gameBoard);
 
 // Returns true if the position passed in is the winning game position.
 char didPlayerWin(unsigned char playerPosition);
