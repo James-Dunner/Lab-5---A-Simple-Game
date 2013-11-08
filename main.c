@@ -8,15 +8,17 @@
 #include "lcd.h"
 #include "buttons/button.h"
 #include "game.h"
+#include "msp430-rng/rand.h"
 
 char timerCount = 1; // Keeps track of how many times interrupt triggered
-signed char gameOn = 1; // Starts the game
+signed int gameOn = 1; // Starts the game
 playingBoard gameBoard;
 
 void init_timer();
 void init_buttons();
 char * getTopLineOfBoard(playingBoard * gameBoard);
 char * getBottomLineOfBoard(playingBoard * gameBoard);
+void clearTimer();
 
 void main(void)
 {
@@ -36,13 +38,14 @@ void main(void)
 	char boomBottomLine[] = "OOOM!";
 
 	gameBoard = initBoard();
+
 	init_timer();
 	init_buttons();
 	__enable_interrupt();
 
 	while(1)
 	{
-		while(gameOn)
+		while(gameOn == 1)
 		{
 			cursorToLineOne();
 			writeString(getTopLineOfBoard(&gameBoard));
@@ -54,7 +57,7 @@ void main(void)
 
 		if(gameOn <= 0)
 		{
-			if(!timerCount)
+			if(!timerCount && gameOn == 0)
 			{
 				cursorToLineOne();
 				writeString(gameOverTopLine);
@@ -79,6 +82,11 @@ void main(void)
 			}
 		}
 
+		while(gameOn <= 0)
+		{
+		}
+
+		gameBoard = initBoard();
 
 
 	}
@@ -87,6 +95,7 @@ void main(void)
 #pragma vector = TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
 {
+	_disable_interrupt();
 	TACTL &= ~TAIFG;            // clears interrupt flag
 
 	if(timerCount <= RESET_CLOCK && gameOn == 1) // Game is on and Clock is still counting
@@ -94,22 +103,27 @@ __interrupt void TIMER0_A1_ISR()
 		timerCount++;
 	}
 
-	if(gameOn == 1)
+	if(timerCount > RESET_CLOCK && gameOn == 1)
 	{
 		clearBoard(&gameBoard);
 		timerCount = OVERFLOW;
 		gameOn = 0;
 	}
+
+	_enable_interrupt();
 }
 
 #pragma vector = PORT1_VECTOR
 __interrupt void Port_1_ISR(void)
 {
+	//_disable_interrupt();
+
 	if(BIT1 & P1IFG)
 	{
 		if(BIT1 & P1IES)
 		{
 			gameOn = movePlayer(&gameBoard,UP);
+			clearTimer();
 		}else
 		{
 			debounce();
@@ -124,6 +138,7 @@ __interrupt void Port_1_ISR(void)
 		if(BIT2 & P1IES)
 		{
 			gameOn = movePlayer(&gameBoard,DOWN);
+			clearTimer();
 		}else
 		{
 			debounce();
@@ -138,6 +153,7 @@ __interrupt void Port_1_ISR(void)
 		if(BIT3 & P1IES)
 		{
 			gameOn = movePlayer(&gameBoard,LEFT);
+			clearTimer();
 		}else
 		{
 			debounce();
@@ -152,6 +168,7 @@ __interrupt void Port_1_ISR(void)
 		if(BIT4 & P1IES)
 		{
 			gameOn = movePlayer(&gameBoard,RIGHT);
+			clearTimer();
 		}else
 		{
 			debounce();
@@ -160,6 +177,8 @@ __interrupt void Port_1_ISR(void)
 		P1IES ^= BIT4;
 		P1IFG &= ~BIT4;
 	}
+
+	//_enable_interrupt();
 }
 
 void init_timer()
@@ -171,6 +190,12 @@ void init_timer()
     TACTL |= MC1;               						// set count mode to continuous
     TACTL &= ~TAIFG;            						// clear interrupt flag
     TACTL |= TAIE;              						// enable interrupt
+}
+
+void clearTimer()
+{
+	timerCount = 0;
+	TACTL |= TACLR;             						// clear TAR
 }
 
 void init_buttons()

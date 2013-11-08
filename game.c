@@ -8,14 +8,13 @@
 #include "game.h"
 #include "msp430-rng/rand.h"
 
-unsigned volatile int initialSeed = 0x1234; // Initial seed that will be used to gen random number
+unsigned int random = 2207; // Initial seed that will be used to gen random number
 
 playingBoard initBoard()
 {
 	playingBoard board;
 
 	unsigned int i, j;
-	unsigned int randomSeed;
 
 	board.boardWidth = BOARD_WIDTH;
 	board.boardHeight = BOARD_HEIGHT;
@@ -24,19 +23,23 @@ playingBoard initBoard()
 	{
 		for(j = 0; j < board.boardWidth; j++)
 		{
+			if(i == 1 && j == 7)
+			{
+				board.boardArray[i][j] = 0x46;
+			}
 			board.boardArray[i][j] = BLANK;
 		}
 
 		board.boardArray[i][BOARD_WIDTH] = 0x0; // Placed null character at the end of each line so I can print to LCD
-		board.boardArray[1][7] = FINISH; // Marks end of the game
+		//board.boardArray[1][7] = 0x46; // Marks end of the game
 	}
 
 	initPlayer(&board);
-	randomSeed = prand(initialSeed);
 
 	do	// If generated mines do not meet spec, will regenerate mines
 	{
-		placeMines(&board, randomSeed);
+		random = prand(random);
+		placeMines(&board);
 	} while(!correctMinePlacement(&board));
 
 	return board;
@@ -47,10 +50,9 @@ void initPlayer(playingBoard * board)
 	board->boardArray[0][0] = PLAYER; // Place * at start
 }
 
-void placeMines(playingBoard * board, unsigned int randomSeed)
+void placeMines(playingBoard * board)
 {
 	char mine_1_X, mine_1_Y, mine_2_X, mine_2_Y;
-	unsigned int randomNum;
 	unsigned int i, j;
 
 	for(i = 0; i < board->boardHeight; i++) // need to clear board in case previous mines were incorrectly placed
@@ -64,17 +66,19 @@ void placeMines(playingBoard * board, unsigned int randomSeed)
 		}
 	}
 
-	randomNum = prand(randomSeed);
-	mine_1_X = (randomNum)%8; // Generates x-coord for first mine
+	board->boardArray[1][7] = 0x46;
 
-	randomNum = prand(randomNum);
-	mine_1_Y = (randomNum)%2; // Generates y-coord for first mine
+	random = prand(random);
+	mine_1_X = (random)%8; // Generates x-coord for first mine
 
-	randomNum = prand(randomNum);
-	mine_2_X = (randomNum)%8; // Generates x-coord for second mine
+	random = prand(random);
+	mine_1_Y = (random)%2; // Generates y-coord for first mine
 
-	randomNum = prand(randomNum);
-	mine_2_Y = (randomNum)%2; // Generates y-coord for second mine
+	random = prand(random);
+	mine_2_X = (random)%8; // Generates x-coord for second mine
+
+	random = prand(random);
+	mine_2_Y = (random)%2; // Generates y-coord for second mine
 
 	board->boardArray[mine_1_Y][mine_1_X] = MINE;
 	board->boardArray[mine_2_Y][mine_2_X] = MINE;
@@ -147,7 +151,7 @@ void clearBoard(playingBoard * gameBoard)
 	}
 }
 
-signed char movePlayer(playingBoard * gameBoard, unsigned char movementDirection)
+signed int movePlayer(playingBoard * gameBoard, unsigned char movementDirection)
 {
 	unsigned volatile char playerLocation_X, playerLocation_Y;
 
@@ -197,14 +201,14 @@ signed char movePlayer(playingBoard * gameBoard, unsigned char movementDirection
 	// Tests if player hit mine
 	if(gameBoard->boardArray[playerLocation_Y][playerLocation_X] == MINE)
 	{
-		clearBoard(gameBoard);
+		//clearBoard(gameBoard);
 		return BOOM;
 	}
 
 	// Tests if player made it to finish
 	if(gameBoard->boardArray[playerLocation_Y][playerLocation_X] == FINISH) // Adding mark on game board to indicate finish
 	{
-		clearBoard(gameBoard);
+		//clearBoard(gameBoard);
 		return WINNER;
 	}
 

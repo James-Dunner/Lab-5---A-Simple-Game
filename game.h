@@ -18,7 +18,7 @@
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
-#define BOOM 0
+#define BOOM -2
 #define WINNER -1
 #define FINISH 0x46
 #define RESET_CLOCK 4
@@ -38,13 +38,13 @@ playingBoard initBoard();
 void initPlayer(playingBoard * board);
 
 // Places mines on board
-void placeMines(playingBoard * board, unsigned int randomSeed);
+void placeMines(playingBoard * board);
 
 // Checks that mines were correctly placed on board
 char correctMinePlacement(playingBoard * board);
 
 // Given a player's current position and a direction, returns an updated player position.
-signed char movePlayer(playingBoard * gameBoard, unsigned char movementDirection);
+signed int movePlayer(playingBoard * gameBoard, unsigned char movementDirection);
 
 // Locates Player X-Coord
 unsigned char findPlayer_X(playingBoard * gameBoard);
