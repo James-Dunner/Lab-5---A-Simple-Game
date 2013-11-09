@@ -9,21 +9,23 @@
 #ifndef GAME_H_
 #define GAME_H_
 
-#define BOARD_WIDTH 8 // Length of board (char)
-#define BOARD_HEIGHT 2 // Height of board (char)
-#define PLAYER	0x2a // * character for player
-#define MINE 0x58 // X for mines
-#define BLANK 0x20 // Space character
-#define UP 1
-#define DOWN 2
-#define LEFT 3
-#define RIGHT 4
-#define BOOM -2
-#define WINNER -1
-#define FINISH 0x46
-#define RESET_CLOCK 4
-#define OVERFLOW 0
+#define BOARD_WIDTH 8 											// Length of board (char)
+#define BOARD_HEIGHT 2 											// Height of board (char)
+#define PLAYER	0x2a 											// * character for player
+#define MINE 0x58 												// X character for mines
+#define BLANK 0x20 												// Space character to make empty board spaces
+#define UP 1 													// Move up
+#define DOWN 2 													// Move down
+#define LEFT 3 													// Move left
+#define RIGHT 4 												// Move right
+#define BOOM -2 												// Constant for when a mine is hit
+#define WINNER -1 												// Constant for when make it to finish
+#define FINISH 0x46 											// F character to mark finish
+#define RESET_CLOCK 4 											// Number of times clock overflows before timer interrupt triggered
+#define OVERFLOW 0 												// Constant used to reset timer
 
+
+// Struct to define variable of type playing board
 typedef struct playingBoard
 {
 	char boardArray[BOARD_HEIGHT][BOARD_WIDTH+1];
@@ -31,38 +33,78 @@ typedef struct playingBoard
 	char boardHeight;
 } playingBoard;
 
-// Initializes board
+/************************************************************************
+ * Function Name: initBoard
+ * Author: James Dunn
+ * Description: Initializes playing board with player, mines, and finish
+ * Inputs: None
+ * Returns: None
+ ***********************************************************************/
 playingBoard initBoard();
 
-// Initializes player at starting location
+/************************************************************************
+ * Function Name: initPlayer
+ * Author: James Dunn
+ * Description: Initializes playing board with player at start position
+ * Inputs: Pointer to gameboard
+ * Returns: None
+ ***********************************************************************/
 void initPlayer(playingBoard * board);
 
-// Places mines on board
+/************************************************************************
+ * Function Name: placeMines
+ * Author: James Dunn
+ * Description: Randomly places 2 mines on playing board
+ * Inputs: Pointer to game board
+ * Returns: None
+ ***********************************************************************/
 void placeMines(playingBoard * board);
 
-// Checks that mines were correctly placed on board
+/************************************************************************
+ * Function Name:  correctMinePlacement
+ * Author: James Dunn
+ * Description: Checks that mines are placed so game can be won
+ * Inputs: Pointer to game board
+ * Returns: 1 if mines correctly placed, 0 if not
+ ***********************************************************************/
 char correctMinePlacement(playingBoard * board);
 
-// Given a player's current position and a direction, returns an updated player position.
+/************************************************************************
+ * Function Name:  movePlayer
+ * Author: James Dunn
+ * Description: Moves player one position (left, right, up, down)
+ * depending on button push
+ * Inputs: Pointer to game board, constant that defines direction
+ * Returns: Returns int that determines if hit mine, reached end, or
+ * standard move
+ ***********************************************************************/
 signed int movePlayer(playingBoard * gameBoard, unsigned char movementDirection);
 
-// Locates Player X-Coord
+/************************************************************************
+ * Function Name:  findPlayer_X
+ * Author: James Dunn
+ * Description: Determines x coordinate of players current position
+ * Inputs: Pointer to game board
+ * Returns: X coordinate of current position
+ ***********************************************************************/
 unsigned char findPlayer_X(playingBoard * gameBoard);
 
-// Locates Player Y-Coord
+/************************************************************************
+ * Function Name:  findPlayer_Y
+ * Author: James Dunn
+ * Description: Determines y coordinate of players current position
+ * Inputs: Pointer to game board
+ * Returns: Y coordinate of current position
+ ***********************************************************************/
 unsigned char findPlayer_Y(playingBoard * gameBoard);
 
-// Clears game board
+/************************************************************************
+ * Function Name:  clearBoard
+ * Author: James Dunn
+ * Description: Clears entire game board
+ * Inputs: Pointer to current game board
+ * Returns: None
+ ***********************************************************************/
 void clearBoard(playingBoard * gameBoard);
-
-// Returns true if the position passed in is the winning game position.
-char didPlayerWin(unsigned char playerPosition);
-
-// Functions which may prove useful in achieving A-Functionality.
-	/*
-	char didPlayerHitMine(unsigned char player, unsigned char mines[NUM_MINES]);
-	void generateMines(unsigned char mines[NUM_MINES]);
-	void printMines(unsigned char mines[NUM_MINES]);
-	*/
 
 #endif /* GAME_H_ */
